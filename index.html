@@ -120,12 +120,8 @@
       reader.readAsDataURL(file);
     });
   }
-</script>
 
 
-<button id="test">Test POST</button>
-
-<script>
 document.getElementById('test').onclick = async () => {
   const fd = new FormData();
   fd.append('test', 'ok');
@@ -141,7 +137,9 @@ document.getElementById('test').onclick = async () => {
     console.error('FETCH ERROR', e);
   }
 };
+    
 </script>
+<button id="test">Test POST</button>
 
 
   
