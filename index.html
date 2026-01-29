@@ -123,5 +123,28 @@
 </script>
 
 
+<button id="test">Test POST</button>
+
+<script>
+document.getElementById('test').onclick = async () => {
+  const fd = new FormData();
+  fd.append('test', 'ok');
+
+  try {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbyh8wP590G697WiiLdOGG1r3FhafisqXIuRfPNdHvznLx5UnJhZLm9MdrN8JdjsKbQ/exec', {
+      method: 'POST',
+      body: fd
+    });
+    const text = await res.text();
+    console.log(text);
+  } catch (e) {
+    console.error('FETCH ERROR', e);
+  }
+};
+</script>
+
+
+  
+
 </body>
 </html>
