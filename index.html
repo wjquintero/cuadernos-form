@@ -42,5 +42,86 @@
     <div id="message" class="mt-3 text-center"></div>
   </div>
 
+  <script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyh8wP590G697WiiLdOGG1r3FhafisqXIuRfPNdHvznLx5UnJhZLm9MdrN8JdjsKbQ/exec";
+  
+  const form = document.getElementById("uploadForm");
+  const messageDiv = document.getElementById("message");
+  
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    messageDiv.innerHTML = "⏳ Subiendo archivos...";
+  
+    try {
+      const filesInput = document.getElementById("files");
+      const files = filesInput.files;
+  
+      if (!files.length) {
+        showError("Debes seleccionar al menos un archivo.");
+        return;
+      }
+  
+      const filesBase64 = [];
+  
+      for (const file of files) {
+        const base64 = await fileToBase64(file);
+        filesBase64.push({
+          name: file.name,
+          type: file.type,
+          data: base64
+        });
+      }
+  
+      const payload = {
+        action: "upload",
+        email: "williamqq@gmail.com",
+        pin: "2910",
+        fecha: document.getElementById("fecha").value,
+        materia: document.getElementById("materia").value,
+        studentName: document.getElementById("studentName").value,
+        files: filesBase64
+      };
+  
+      const response = await fetch(WEB_APP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+  
+      const result = await response.json();
+  
+      if (!result.success) {
+        showError(result.error || "Ocurrió un error inesperado.");
+        return;
+      }
+  
+      messageDiv.innerHTML = "✅ Archivos subidos correctamente";
+      form.reset();
+  
+    } catch (err) {
+      console.error(err);
+      showError("No se pudo subir el archivo. Intenta nuevamente.");
+    }
+  });
+  
+  function showError(text) {
+    messageDiv.innerHTML = `<div class="alert alert-danger">${text}</div>`;
+  }
+  
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // quitar "data:image/png;base64,"
+        const base64 = reader.result.split(",")[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+</script>
+
+
 </body>
 </html>
