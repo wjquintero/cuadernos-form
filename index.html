@@ -1,130 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Subir cuadernos</title>
-
-  <!-- Bootstrap (para que se vea bien sin saber UI) -->
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subida de Cuadernos</title>
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body class="bg-light">
 
-  <div class="container mt-4">
-    <h4 class="mb-3">📘 Subir fotos de cuadernos</h4>
+<div class="container py-4">
+  <h2 class="mb-4 text-center">Subida de Cuadernos</h2>
 
-    <form id="uploadForm" class="card p-3 shadow-sm">
+  <div id="message"></div>
 
-      <div class="mb-2">
-        <label class="form-label">Email</label>
-        <input name="email" type="email" class="form-control" required />
-      </div>
+  <form id="uploadForm" class="bg-white p-3 rounded shadow-sm">
+    <div class="mb-3">
+      <label>Email del padre/madre</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label">PIN del curso</label>
-        <input name="pin" type="number" class="form-control" required />
-      </div>
+    <div class="mb-3">
+      <label>PIN del curso</label>
+      <input type="text" name="pin" class="form-control" required>
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label">Fecha de la clase</label>
-        <input name="fecha" type="date" class="form-control" required />
-      </div>
+    <div class="mb-3">
+      <label>Fecha de la clase</label>
+      <input type="date" name="fecha" class="form-control" required>
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label">Materia</label>
-        <input name="materia" type="text" class="form-control" required />
-      </div>
+    <div class="mb-3">
+      <label>Materia</label>
+      <input type="text" name="materia" class="form-control" required>
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label">Nombre del estudiante</label>
-        <input name="studentName" type="text" class="form-control" required />
-      </div>
+    <div class="mb-3">
+      <label>Nombre del estudiante</label>
+      <input type="text" name="studentName" class="form-control" required>
+    </div>
 
-      <div class="mb-3">
-        <label class="form-label">Fotos del cuaderno (máx 4)</label>
-        <input
-          name="files"
-          type="file"
-          class="form-control"
-          accept="image/*"
-          multiple
-          required
-        />
-      </div>
+    <div class="mb-3">
+      <label>Selecciona imágenes (máx 4)</label>
+      <input type="file" name="files" class="form-control" accept="image/*" multiple required>
+    </div>
 
-      <button type="submit" class="btn btn-primary w-100">
-        Subir
-      </button>
-    </form>
-
-    <div id="message" class="mt-3"></div>
-
-    <!-- Botón temporal de prueba -->
-    <button id="testBtn" class="btn btn-secondary mt-4 w-100">
-      Test conexión backend
-    </button>
-  </div>
+    <button type="submit" class="btn btn-primary w-100">Subir</button>
+  </form>
+</div>
 
 <script>
-  const WEB_APP_URL =
-    "https://script.google.com/macros/s/AKfycbzp7DkOKdfNuy_AqTnS5k3UAq8fSebW2t_lhZAXkmnhJKymXhSaiJQBqL-LqFvWBLrCKQ/exec";
+const WEB_APP_URL = "TU_WEB_APP_URL_AQUI";
 
-  const form = document.getElementById("uploadForm");
-  const messageDiv = document.getElementById("message");
+const form = document.getElementById("uploadForm");
+const messageDiv = document.getElementById("message");
 
-  // 🔹 SUBMIT REAL
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    messageDiv.innerHTML =
-      '<div class="alert alert-info">Subiendo archivos…</div>';
+  messageDiv.innerHTML = "";
 
-    const formData = new FormData(form);
+  const filesInput = form.querySelector('input[name="files"]');
+  if (filesInput.files.length === 0) {
+    messageDiv.innerHTML = '<div class="alert alert-danger">Debes seleccionar al menos una imagen</div>';
+    return;
+  }
+  if (filesInput.files.length > 4) {
+    messageDiv.innerHTML = '<div class="alert alert-danger">Máximo 4 imágenes por subida</div>';
+    return;
+  }
 
-    try {
-      const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        body: formData
-      });
+  const fd = new FormData();
+  fd.append("email", form.email.value);
+  fd.append("pin", form.pin.value);
+  fd.append("fecha", form.fecha.value);
+  fd.append("materia", form.materia.value);
+  fd.append("studentName", form.studentName.value);
 
-      const json = await response.json();
+  // Agregar cada archivo con nombre único
+  for (let i = 0; i < filesInput.files.length; i++) {
+    fd.append("file" + i, filesInput.files[i]);
+  }
 
-      if (!json.success) {
-        messageDiv.innerHTML =
-          '<div class="alert alert-danger">' + json.error + "</div>";
-        return;
-      }
-
-      messageDiv.innerHTML =
-        '<div class="alert alert-success">✅ Subida exitosa</div>';
-
-      form.reset();
-
-    } catch (err) {
-      console.error(err);
-      messageDiv.innerHTML =
-        '<div class="alert alert-danger">No se pudo subir el archivo. Intenta nuevamente.</div>';
-    }
-  });
-
-  // 🔹 BOTÓN TEST (temporal)
-  document.getElementById("testBtn").onclick = async () => {
-    const fd = new FormData();
-    fd.append("test", "ok");
-
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      body: fd
-    });
-
+  try {
+    const res = await fetch(WEB_APP_URL, { method: "POST", body: fd });
     const json = await res.json();
-    alert(JSON.stringify(json));
-  };
-</script>
 
+    if (json.success) {
+      messageDiv.innerHTML = '<div class="alert alert-success">✅ ' + json.message + '</div>';
+      form.reset();
+    } else {
+      messageDiv.innerHTML = '<div class="alert alert-danger">' + json.error + '</div>';
+    }
+  } catch (err) {
+    messageDiv.innerHTML = '<div class="alert alert-danger">Error en la conexión: ' + err.message + '</div>';
+  }
+});
+</script>
 </body>
 </html>
