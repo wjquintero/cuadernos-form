@@ -52,6 +52,16 @@
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-0ZKGCbPOaYxI9j-nexPk_Y7MBuJCW8_nnEXNWV0ezVVRz9xe4AuEZFPFoaZHk4KxtA/exec";
 
+// Convertir archivo a Base64
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]); // solo base64
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 const form = document.getElementById("uploadForm");
 const messageDiv = document.getElementById("message");
 
@@ -69,28 +79,31 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  const fd = new FormData();
-  fd.append("email", form.email.value);
-  fd.append("pin", form.pin.value);
-  fd.append("fecha", form.fecha.value);
-  fd.append("materia", form.materia.value);
-  fd.append("studentName", form.studentName.value);
-
-  // Agregar cada archivo con nombre único
-  for (let i = 0; i < filesInput.files.length; i++) {
-    fd.append("file" + i, filesInput.files[i]);
-  }
-
   try {
-    const res = await fetch(WEB_APP_URL, { method: "POST", body: fd });
-    const text = await res.text();
-
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      throw new Error("Respuesta inesperada del servidor (no es JSON): " + text.substring(0, 200));
+    // Convertir todos los archivos a base64
+    const imagesBase64 = [];
+    for (let i = 0; i < filesInput.files.length; i++) {
+      const base64 = await fileToBase64(filesInput.files[i]);
+      imagesBase64.push({ name: filesInput.files[i].name, data: base64 });
     }
+
+    // Preparar payload JSON
+    const payload = {
+      email: form.email.value,
+      pin: form.pin.value,
+      fecha: form.fecha.value,
+      materia: form.materia.value,
+      studentName: form.studentName.value,
+      images: imagesBase64
+    };
+
+    const res = await fetch(WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const json = await res.json();
 
     if (json.success) {
       messageDiv.innerHTML = '<div class="alert alert-success">✅ ' + json.message + '</div>';
@@ -98,6 +111,7 @@ form.addEventListener("submit", async (e) => {
     } else {
       messageDiv.innerHTML = '<div class="alert alert-danger">' + json.error + '</div>';
     }
+
   } catch (err) {
     messageDiv.innerHTML = '<div class="alert alert-danger">Error en la conexión: ' + err.message + '</div>';
   }
