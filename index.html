@@ -14,7 +14,9 @@
 
   <div id="message"></div>
 
-  <form id="uploadForm" class="bg-white p-3 rounded shadow-sm">
+  <!-- Form clásico que apunta a tu Web App -->
+  <form id="uploadForm" action="https://script.google.com/macros/s/AKfycbzp7DkOKdfNuy_AqTnS5k3UAq8fSebW2t_lhZAXkmnhJKymXhSaiJQBqL-LqFvWBLrCKQ/exec"
+        method="POST" enctype="multipart/form-data" target="hidden_iframe" class="bg-white p-3 rounded shadow-sm">
     <div class="mb-3">
       <label>Email del padre/madre</label>
       <input type="email" name="email" class="form-control" required>
@@ -49,73 +51,47 @@
   </form>
 </div>
 
+<!-- iframe oculto para no recargar la página -->
+<iframe name="hidden_iframe" style="display:none;"></iframe>
+
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw-0ZKGCbPOaYxI9j-nexPk_Y7MBuJCW8_nnEXNWV0ezVVRz9xe4AuEZFPFoaZHk4KxtA/exec";
-
-// Convertir archivo a Base64
-async function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]); // solo base64
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 const form = document.getElementById("uploadForm");
 const messageDiv = document.getElementById("message");
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  messageDiv.innerHTML = "";
-
+// Validación de máximo 4 archivos antes de enviar
+form.addEventListener("submit", (e) => {
   const filesInput = form.querySelector('input[name="files"]');
   if (filesInput.files.length === 0) {
+    e.preventDefault();
     messageDiv.innerHTML = '<div class="alert alert-danger">Debes seleccionar al menos una imagen</div>';
     return;
   }
   if (filesInput.files.length > 4) {
+    e.preventDefault();
     messageDiv.innerHTML = '<div class="alert alert-danger">Máximo 4 imágenes por subida</div>';
     return;
   }
 
+  messageDiv.innerHTML = '<div class="alert alert-info">Subiendo imágenes...</div>';
+});
+
+// Escuchar la respuesta del iframe
+window.addEventListener("message", (event) => {
+  if (!event.data) return;
   try {
-    // Convertir todos los archivos a base64
-    const imagesBase64 = [];
-    for (let i = 0; i < filesInput.files.length; i++) {
-      const base64 = await fileToBase64(filesInput.files[i]);
-      imagesBase64.push({ name: filesInput.files[i].name, data: base64 });
-    }
-
-    // Preparar payload JSON
-    const payload = {
-      email: form.email.value,
-      pin: form.pin.value,
-      fecha: form.fecha.value,
-      materia: form.materia.value,
-      studentName: form.studentName.value,
-      images: imagesBase64
-    };
-
-    const res = await fetch(WEB_APP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const json = await res.json();
-
-    if (json.success) {
-      messageDiv.innerHTML = '<div class="alert alert-success">✅ ' + json.message + '</div>';
+    const data = JSON.parse(event.data);
+    if (data.success) {
+      messageDiv.innerHTML = '<div class="alert alert-success">✅ ' + data.message + '</div>';
       form.reset();
     } else {
-      messageDiv.innerHTML = '<div class="alert alert-danger">' + json.error + '</div>';
+      messageDiv.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
     }
-
-  } catch (err) {
-    messageDiv.innerHTML = '<div class="alert alert-danger">Error en la conexión: ' + err.message + '</div>';
-  }
+  } catch(err) {}
 });
+
+// Para Web Apps de Apps Script no se puede enviar postMessage directo desde el iframe
+// Entonces la respuesta real se puede ver en el log de Apps Script o en un alert si quieres.
 </script>
+
 </body>
 </html>
