@@ -2,95 +2,297 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subida de Cuadernos</title>
-  <!-- Bootstrap CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .preview-img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .preview-wrapper {
+      position: relative;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      line-height: 26px;
+      text-align: center;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-4">
-  <h2 class="mb-4 text-center">Subida de Cuadernos</h2>
+<div class="container py-3">
 
-  <div id="message"></div>
+  <!-- LOGIN DIV -->
+  <div id="loginDiv">
+    <h4 class="text-center mb-3">🔑 Ingresar</h4>
 
-  <!-- Form clásico que apunta a tu Web App -->
-  <form id="uploadForm" action="https://script.google.com/macros/s/AKfycbw-0ZKGCbPOaYxI9j-nexPk_Y7MBuJCW8_nnEXNWV0ezVVRz9xe4AuEZFPFoaZHk4KxtA/exec"
-        method="POST" enctype="multipart/form-data" target="hidden_iframe" class="bg-white p-3 rounded shadow-sm">
-    <div class="mb-3">
-      <label>Email del padre/madre</label>
-      <input type="email" name="email" class="form-control" required>
+    <div class="mb-2">
+      <input id="email" class="form-control form-control-lg" type="email" placeholder="Email">
     </div>
 
-    <div class="mb-3">
-      <label>PIN del curso</label>
-      <input type="text" name="pin" class="form-control" required>
+    <div class="mb-2">
+      <input id="pin" class="form-control form-control-lg" type="password" placeholder="PIN">
     </div>
 
-    <div class="mb-3">
-      <label>Fecha de la clase</label>
-      <input type="date" name="fecha" class="form-control" required>
+    <button class="btn btn-primary w-100" onclick="loginUser()">Acceder</button>
+    <div id="loginStatus" class="mt-3 text-center text-danger"></div>
+  </div>
+
+  <!-- UPLOAD DIV -->
+  <div id="uploadDiv" style="display:none">
+
+    <!-- CABECERA -->
+    <div class="card mb-3 p-3 shadow-sm bg-primary text-white">
+      <div class="d-flex justify-content-between flex-wrap align-items-center">
+        <div class="me-3">
+          <h6 class="mb-0">👤 Usuario</h6>
+          <strong id="headerEmail"></strong>
+        </div>
+        <div class="me-3">
+          <h6 class="mb-0">👦 Alumno</h6>
+          <strong id="headerStudent"></strong>
+        </div>
+        <div class="me-3">
+          <h6 class="mb-0">🧑 Tutor</h6>
+          <strong id="headerParent"></strong>
+        </div>
+        <div class="ms-auto text-end">
+          <h6 class="mb-0">📅 Fecha</h6>
+          <strong id="headerDate"></strong>
+        </div>
+      </div>
     </div>
 
-    <div class="mb-3">
-      <label>Materia</label>
-      <input type="text" name="materia" class="form-control" required>
+    <!-- FORMULARIO -->
+    <div class="card shadow-sm p-3">
+      <div class="mb-2">
+        <input class="form-control form-control-lg" type="date" id="fecha">
+      </div>
+
+      <div class="mb-2">
+        <select class="form-control form-control-lg" id="materia">
+          <option value="">Cargando materias...</option>
+        </select>
+      </div>
+
+      <input type="file" id="files" accept="image/*" multiple hidden>
+
+      <button class="btn btn-outline-secondary btn-lg w-100 mb-2" onclick="files.click()">
+        📷 Selecciona tus imágenes
+      </button>
+
+      <div id="preview" class="row g-2 mb-3"></div>
+
+      <button class="btn btn-primary btn-lg w-100 py-3" onclick="submitForm()">
+        📤 Subir imágenes
+      </button>
+
+      <div id="status" class="mt-3 text-center"></div>
     </div>
 
-    <div class="mb-3">
-      <label>Nombre del estudiante</label>
-      <input type="text" name="studentName" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-      <label>Selecciona imágenes (máx 4)</label>
-      <input type="file" name="files" class="form-control" accept="image/*" multiple required>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">Subir</button>
-  </form>
+  </div>
 </div>
 
-<!-- iframe oculto para no recargar la página -->
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-const form = document.getElementById("uploadForm");
-const messageDiv = document.getElementById("message");
+// ==================== CONFIG ====================
+const API_URL = 'https://cuadernos-proxy.williamqq.workers.dev/';
+let user = null;
+let selectedFiles = [];
+const MAX_IMAGES = 4;
 
-// Validación de máximo 4 archivos antes de enviar
-form.addEventListener("submit", (e) => {
-  const filesInput = form.querySelector('input[name="files"]');
-  if (filesInput.files.length === 0) {
-    e.preventDefault();
-    messageDiv.innerHTML = '<div class="alert alert-danger">Debes seleccionar al menos una imagen</div>';
+// ==================== LOGIN ====================
+function loginUser() {
+  const emailVal = document.getElementById('email').value.trim();
+  const pinVal = document.getElementById('pin').value.trim();
+  const status = document.getElementById('loginStatus');
+
+  if (!emailVal || !pinVal) {
+    status.textContent = '❌ Completa ambos campos';
     return;
   }
-  if (filesInput.files.length > 4) {
-    e.preventDefault();
-    messageDiv.innerHTML = '<div class="alert alert-danger">Máximo 4 imágenes por subida</div>';
-    return;
-  }
 
-  messageDiv.innerHTML = '<div class="alert alert-info">Subiendo imágenes...</div>';
-});
+  status.textContent = '⏳ Verificando...';
 
-// Escuchar la respuesta del iframe
-window.addEventListener("message", (event) => {
-  if (!event.data) return;
-  try {
-    const data = JSON.parse(event.data);
-    if (data.success) {
-      messageDiv.innerHTML = '<div class="alert alert-success">✅ ' + data.message + '</div>';
-      form.reset();
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'login', email: emailVal, pin: pinVal })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if(res.success){
+      user = res;
+      showUploadForm();
     } else {
-      messageDiv.innerHTML = '<div class="alert alert-danger">' + data.error + '</div>';
+      status.textContent = '❌ ' + res.error;
     }
-  } catch(err) {}
+  })
+  .catch(() => status.textContent = '❌ Error técnico');
+}
+
+function showUploadForm() {
+  document.getElementById('headerEmail').textContent = user.email;
+  document.getElementById('headerStudent').textContent = user.studentName;
+  document.getElementById('headerParent').textContent = user.parentName || '–';
+
+  const today = new Date();
+  document.getElementById('headerDate').textContent = today.toLocaleDateString('es-ES', {
+    day:'2-digit', month:'2-digit', year:'numeric'
+  });
+  document.getElementById('fecha').value = today.toISOString().split('T')[0];
+
+  document.getElementById('loginDiv').style.display = 'none';
+  document.getElementById('uploadDiv').style.display = 'block';
+
+  loadMaterias();
+}
+
+// ==================== MATERIAS ====================
+function loadMaterias() {
+  const select = document.getElementById('materia');
+  select.innerHTML = '<option value="">Cargando materias...</option>';
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'getMaterias' })
+  })
+  .then(r => r.json())
+  .then(materias => {
+    select.innerHTML = '<option value="">Selecciona materia</option>';
+    materias.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      select.appendChild(opt);
+    });
+  })
+  .catch(() => {
+    select.innerHTML = '<option value="">Error cargando materias</option>';
+  });
+}
+
+// ==================== PREVIEW IMÁGENES ====================
+files.addEventListener('change', e => {
+  const filesArr = Array.from(e.target.files);
+  for (const file of filesArr) {
+    if (!file.type.startsWith('image/')) continue;
+    if (selectedFiles.length >= MAX_IMAGES) break;
+    selectedFiles.push(file);
+  }
+  renderPreview();
+  e.target.value = '';
 });
 
-// Para Web Apps de Apps Script no se puede enviar postMessage directo desde el iframe
-// Entonces la respuesta real se puede ver en el log de Apps Script o en un alert si quieres.
+function renderPreview() {
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+  selectedFiles.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      preview.innerHTML += `
+        <div class="col-3 preview-wrapper">
+          <img src="${reader.result}" class="preview-img">
+          <button class="remove-btn" onclick="removeImg(${i})">×</button>
+        </div>
+      `;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeImg(i) {
+  selectedFiles.splice(i, 1);
+  renderPreview();
+}
+
+// ==================== SUBIR FORM ====================
+function submitForm() {
+  const status = document.getElementById('status');
+  status.textContent = '⏳ Subiendo...';
+
+  const fecha = document.getElementById('fecha').value;
+  const materia = document.getElementById('materia').value;
+
+  if (!fecha || !materia) {
+    status.textContent = '❌ Completa todos los campos';
+    return;
+  }
+
+  if (selectedFiles.length === 0) {
+    status.textContent = '❌ Selecciona al menos una imagen';
+    return;
+  }
+
+  if (selectedFiles.length > MAX_IMAGES) {
+    status.textContent = '❌ Máximo 4 imágenes';
+    return;
+  }
+
+  Promise.all(selectedFiles.map(fileToBase64))
+    .then(images => {
+      const payload = {
+        email: user.email,
+        studentName: user.studentName,
+        fecha,
+        materia,
+        images
+      };
+
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'uploadCuadernos', payload })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.success){
+          status.textContent = '✅ ' + res.message;
+          selectedFiles = [];
+          renderPreview();
+        } else {
+          status.textContent = '❌ ' + res.error;
+        }
+      })
+      .catch(() => status.textContent = '❌ Error técnico');
+    });
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(',')[1];
+      resolve({ name:file.name, mimeType:file.type, base64 });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 </script>
 
 </body>
