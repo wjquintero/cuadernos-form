@@ -1,0 +1,119 @@
+<style>
+  /* Reset y body */
+  body {
+    background: #f8f9fa;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  /* Contenedor principal centrado */
+  .container {
+    max-width: 480px; /* móvil máximo ancho */
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  /* Cabeceras login y form */
+  .card-header, .login-header {
+    background: #007bff; /* azul bootstrap */
+    color: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+
+  .login-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+  }
+
+  .login-header small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    opacity: 0.85;
+  }
+
+  /* Inputs grandes */
+  input.form-control-lg, select.form-control-lg {
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  button.btn-lg {
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  /* Preview imágenes */
+  .preview-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid #ddd;
+  }
+
+  .preview-wrapper {
+    position: relative;
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  /* Form card */
+  .card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    background: white;
+  }
+
+  /* Header de upload (info usuario) */
+  .upload-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .upload-header div {
+    flex: 1 1 auto;
+    min-width: 100px;
+  }
+
+  .upload-header strong {
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  /* Mobile-first ajuste de columnas preview */
+  .row.g-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  @media(min-width: 480px) {
+    .row.g-2 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
