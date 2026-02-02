@@ -223,7 +223,23 @@ function showConsultaForm() {
 
   // Materias
   loadMateriasIntoSelect('consultaMateria', 'Todas las materias');
+  
+  // 🔑 VALIDACIÓN FINAL
+  validateConsultaFilters();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const fechaInput = document.getElementById('consultaFecha');
+  const materiaSelect = document.getElementById('consultaMateria');
+
+  if (fechaInput) {
+    fechaInput.addEventListener('change', validateConsultaFilters);
+  }
+
+  if (materiaSelect) {
+    materiaSelect.addEventListener('change', validateConsultaFilters);
+  }
+});
 
 
 function fileToBase64(file) {
@@ -253,3 +269,9 @@ function goToConsulta() {
   showConsultaForm(); // todavía no existe
 }
 
+function validateConsultaFilters() {
+  const fecha = document.getElementById('consultaFecha').value;
+  const btn = document.getElementById('consultaBuscarBtn');
+
+  btn.disabled = !fecha;
+}
