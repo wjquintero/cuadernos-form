@@ -74,15 +74,15 @@ function showUploadForm() {
   document.getElementById('loginDiv').style.display = 'none';
   document.getElementById('uploadDiv').style.display = 'block';
 
-  loadMaterias();
+  loadMateriasIntoSelect('materia', 'Selecciona materia');
 }
 
 // ===============================
 // MATERIAS
 // ===============================
-function loadMaterias() {
-  const select = document.getElementById('materia');
-  select.innerHTML = '<option value="">Cargando materias...</option>';
+function loadMateriasIntoSelect(selectId, firstOptionText) {
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">${firstOptionText}</option>`;
 
   fetch(WORKER_URL, {
     method: 'POST',
@@ -91,7 +91,7 @@ function loadMaterias() {
   })
   .then(res => res.json())
   .then(materias => {
-    select.innerHTML = '<option value="">Selecciona materia</option>';
+    select.innerHTML = `<option value="">${firstOptionText}</option>`;
     materias.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m;
@@ -100,7 +100,7 @@ function loadMaterias() {
     });
   })
   .catch(() => {
-    select.innerHTML = '<option value="">Error cargando materias</option>';
+    select.innerHTML = `<option value="">Error cargando materias</option>`;
   });
 }
 
@@ -194,6 +194,37 @@ function submitForm() {
       .catch(() => status.textContent = '❌ Error técnico');
     });
 }
+
+// ===============================
+// MOSTRAR CONSULTA
+// ===============================
+function showConsultaForm() {
+  // Header
+  document.getElementById('consultaHeaderEmail').textContent = user.email;
+  document.getElementById('consultaHeaderStudent').textContent = user.studentName;
+  document.getElementById('consultaHeaderParent').textContent = user.parentName || '–';
+
+  const today = new Date();
+
+  document.getElementById('consultaHeaderDate').textContent =
+    today.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+  // Fecha por defecto
+  document.getElementById('consultaFecha').value =
+    today.toISOString().split('T')[0];
+
+  // Navegación
+  document.getElementById('menuDiv').style.display = 'none';
+  document.getElementById('consultaDiv').style.display = 'block';
+
+  // Materias
+  loadMateriasIntoSelect('consultaMateria', 'Todas las materias');
+}
+
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
