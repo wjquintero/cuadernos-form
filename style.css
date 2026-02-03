@@ -15,28 +15,42 @@ body {
 }
 
 /* ===============================
-   Login Header
+   Upload / Consulta Header Mejorado
 =============================== */
-.login-header {
+.upload-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   background: #007bff;
   color: white;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  text-align: center;
 }
 
-.login-header h2 {
-  margin: 0;
-  font-size: 1.75rem;
+.upload-header div {
+  flex: 1 1 45%; /* Ocupa casi la mitad en desktop */
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.login-header small {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
+.upload-header div strong {
+  font-size: 0.95rem;
+}
+
+.upload-header .label {
+  font-weight: 500;
   opacity: 0.85;
 }
+
+/* Desktop: más horizontal */
+@media(min-width: 576px) {
+  .upload-header div {
+    flex: 1 1 20%; /* 5 columnas aprox */
+  }
+}
+
 
 /* ===============================
    Inputs y Botones
