@@ -241,6 +241,75 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ===============================
+// BUSCAR CUADERNOS
+// ===============================
+function buscarCuadernos() {
+  const fecha = document.getElementById('consultaFecha').value;
+  const materia = document.getElementById('consultaMateria').value;
+  const status = document.getElementById('consultaStatus');
+  const resultsDiv = document.getElementById('consultaResults');
+
+  if (!fecha) {
+    status.textContent = '❌ La fecha es obligatoria';
+    return;
+  }
+
+  status.textContent = '⏳ Buscando...';
+  resultsDiv.innerHTML = '';
+
+  fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getCuadernos',
+      payload: {
+        email: user.email,   // para validar whitelist
+        fecha,
+        materia
+      }
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if(res.success) {
+      if(res.items.length === 0) {
+        status.textContent = '⚠️ No se encontraron resultados';
+      } else {
+        status.textContent = '';
+        renderConsultaResults(res.items);
+      }
+    } else {
+      status.textContent = '❌ ' + res.error;
+    }
+  })
+  .catch(() => status.textContent = '❌ Error técnico');
+}
+
+function renderConsultaResults(items) {
+  const resultsDiv = document.getElementById('consultaResults');
+  resultsDiv.innerHTML = '';
+
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'card mb-2 p-2';
+
+    div.innerHTML = `
+      <div><strong>Fecha:</strong> ${item.fecha}</div>
+      <div><strong>Materia:</strong> ${item.materia}</div>
+      <div><strong>Estudiante:</strong> ${item.studentName}</div>
+      <div><strong>Imágenes:</strong> ${item.imageCount}</div>
+      <div class="mt-2 text-end">
+        <button class="btn btn-sm btn-outline-primary" onclick="verDetalleCuaderno('${item.uploadId}')">
+          Ver detalle
+        </button>
+      </div>
+    `;
+    resultsDiv.appendChild(div);
+  });
+}
+
+
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
