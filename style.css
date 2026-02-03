@@ -15,42 +15,28 @@ body {
 }
 
 /* ===============================
-   Upload / Consulta Header Mejorado
+   Login Header
 =============================== */
-.upload-header {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.login-header {
   background: #007bff;
   color: white;
-  padding: 0.75rem 1rem;
+  padding: 1rem;
   border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  text-align: center;
 }
 
-.upload-header div {
-  flex: 1 1 45%; /* Ocupa casi la mitad en desktop */
-  min-width: 140px;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.login-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
 }
 
-.upload-header div strong {
-  font-size: 0.95rem;
-}
-
-.upload-header .label {
-  font-weight: 500;
+.login-header small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
   opacity: 0.85;
 }
-
-/* Desktop: más horizontal */
-@media(min-width: 576px) {
-  .upload-header div {
-    flex: 1 1 20%; /* 5 columnas aprox */
-  }
-}
-
 
 /* ===============================
    Inputs y Botones
@@ -79,21 +65,42 @@ button.btn-lg {
 }
 
 /* ===============================
-   Upload Header (info usuario)
+   Header avanzado (Upload & Consulta)
 =============================== */
-.upload-header {
+.header-card {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: space-between;
+  background: #007bff;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
   align-items: center;
+  justify-content: space-between;
 }
 
-.upload-header div {
-  flex: 1 1 auto;
-  min-width: 100px;
+.header-item {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+  font-size: 0.95rem;
 }
 
+.header-item .icon {
+  font-size: 1.1rem;
+}
+
+@media(min-width: 576px) {
+  .header-item {
+    flex: 1 1 20%;
+  }
+}
+
+/* ===============================
+   Upload Header (info usuario)
+=============================== */
 .upload-header strong {
   display: block;
   font-size: 0.95rem;
