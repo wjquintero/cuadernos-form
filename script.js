@@ -309,6 +309,64 @@ function renderConsultaResults(items) {
   });
 }
 
+// ===============================
+// DETALLE CUADERNO
+// ===============================
+function verDetalleCuaderno(uploadId) {
+  const infoDiv = document.getElementById('detalleInfo');
+  const imagesDiv = document.getElementById('detalleImages');
+
+  infoDiv.textContent = '⏳ Cargando...';
+  imagesDiv.innerHTML = '';
+
+  document.getElementById('consultaDiv').style.display = 'none';
+  document.getElementById('detalleDiv').style.display = 'block';
+
+  fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'getUploadDetail',
+      payload: { email: user.email, uploadId }
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.success) {
+      renderDetalle(res.metadata, res.images);
+    } else {
+      infoDiv.textContent = '❌ ' + res.error;
+    }
+  })
+  .catch(() => infoDiv.textContent = '❌ Error técnico');
+}
+
+function renderDetalle(metadata, images) {
+  const infoDiv = document.getElementById('detalleInfo');
+  const imagesDiv = document.getElementById('detalleImages');
+
+  infoDiv.innerHTML = `
+    <div><strong>📅 Fecha:</strong> ${metadata.fecha}</div>
+    <div><strong>📚 Materia:</strong> ${metadata.materia}</div>
+    <div><strong>👦 Estudiante:</strong> ${metadata.studentName}</div>
+    <div><strong>🖼️ Imágenes:</strong> ${images.length}</div>
+  `;
+
+  imagesDiv.innerHTML = '';
+  images.forEach(img => {
+    const imgEl = document.createElement('img');
+    imgEl.src = img.url;
+    imgEl.className = 'detalle-img';
+    imgEl.alt = 'Página ' + img.pageNumber;
+    imagesDiv.appendChild(imgEl);
+  });
+}
+
+function volverAConsulta() {
+  document.getElementById('detalleDiv').style.display = 'none';
+  document.getElementById('consultaDiv').style.display = 'block';
+}
+
 
 
 function fileToBase64(file) {
@@ -335,7 +393,7 @@ function goToUpload() {
 
 function goToConsulta() {
   document.getElementById('menuDiv').style.display = 'none';
-  showConsultaForm(); // todavía no existe
+  showConsultaForm();
 }
 
 function validateConsultaFilters() {
