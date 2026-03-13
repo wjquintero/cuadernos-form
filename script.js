@@ -354,11 +354,15 @@ function renderDetalle(metadata, images) {
 
   imagesDiv.innerHTML = '';
   images.forEach(img => {
+    const link = document.createElement('a');
+    link.href = img.url;
+    link.target = '_blank';
     const imgEl = document.createElement('img');
     imgEl.src = img.url;
     imgEl.className = 'detalle-img';
     imgEl.alt = 'Página ' + img.pageNumber;
-    imagesDiv.appendChild(imgEl);
+    link.appendChild(imgEl);
+    imagesDiv.appendChild(link);
   });
 }
 
