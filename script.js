@@ -357,6 +357,7 @@ function renderDetalle(metadata, images) {
     const link = document.createElement('a');
     link.href = img.url;
     link.className = 'detalle-link';
+    if (window.innerWidth >= 768) link.target = '_blank';
     const imgEl = document.createElement('img');
     imgEl.src = img.url;
     imgEl.className = 'detalle-img';
