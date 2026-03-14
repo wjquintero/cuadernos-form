@@ -359,7 +359,7 @@ function renderDetalle(metadata, images) {
     link.className = 'detalle-link';
     if (window.innerWidth >= 768) link.target = '_blank';
     const imgEl = document.createElement('img');
-    imgEl.src = img.url;
+    imgEl.src = img.url + '=w400';
     imgEl.className = 'detalle-img';
     imgEl.alt = 'Página ' + img.pageNumber;
     link.appendChild(imgEl);
