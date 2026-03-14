@@ -356,7 +356,7 @@ function renderDetalle(metadata, images) {
   images.forEach(img => {
     const link = document.createElement('a');
     link.href = img.url;
-    link.target = '_blank';
+    link.className = 'detalle-link';
     const imgEl = document.createElement('img');
     imgEl.src = img.url;
     imgEl.className = 'detalle-img';

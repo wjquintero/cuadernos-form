@@ -164,4 +164,10 @@ button.btn-lg {
   width: 100%;
   border-radius: 0.5rem;
   border: 1px solid #ddd;
+  display: block;
+  pointer-events: none;
+}
+
+.detalle-link {
+  display: block;
 }
